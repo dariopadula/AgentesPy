@@ -2,7 +2,7 @@ from mesa import Model
 from mesa.time import RandomActivation
 from datetime import timedelta
 import random
-from models.agent import Auto
+from models.agent import AgenteMovil #Auto
 
 
 class ModeloMovilidad(Model):
@@ -25,7 +25,7 @@ class ModeloMovilidad(Model):
         viajes_a_iniciar = [v for v in self.viajes_pendientes if v["tiempo_salida"] <= tiempo_actual]
         for viaje in viajes_a_iniciar:
             #print(f"Tiempo actual: {tiempo_actual} -> Teimepo salida {viaje['tiempo_salida']}")
-            agente = Auto(
+            agente = AgenteMovil(
                 unique_id=self.schedule.get_agent_count() + 1, 
                 model=self,
                 origen=viaje["origen"],

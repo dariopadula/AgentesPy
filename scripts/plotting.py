@@ -2,11 +2,13 @@ import networkx as nx
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 import matplotlib.colors as mcolors
+import contextily as ctx
+import numpy as np
 
 import time
 
 
-def setup_plot(G, nodes_gdf):
+def setup_plot(G, nodes_gdf, scatter = False):
     # Configurar el gráfico inicial
 
         ###############################
@@ -17,12 +19,22 @@ def setup_plot(G, nodes_gdf):
     # here we are creating sub plots
     figure, ax = plt.subplots(figsize=(10, 8))
 
-    nx.draw(G, pos, ax=ax, with_labels=False, node_size=10, node_color="gray", edge_color="lightgray", alpha=0.1, width=0.1)
+    #nx.draw(G, pos, ax=ax, with_labels=False, node_size=10, node_color="gray", edge_color="lightgray", alpha=0.1, width=0.1)
+    #nx.draw(G, pos, ax=ax, node_size=0, width=0,alpha=0)
+
+    # Agregar mapa base
+    ax.set_xlim(nodes_gdf['x'].min(), nodes_gdf['x'].max())
+    ax.set_ylim(nodes_gdf['y'].min(), nodes_gdf['y'].max())
+    ctx.add_basemap(ax, crs=nodes_gdf.crs.to_string(), source=ctx.providers.CartoDB.Positron)
 
     x, y = [], []
-    agents, = ax.plot(x, y, 'go', markersize=1)  # Usa un tamaño mayor
+    if scatter:
+        agents = ax.scatter(x, y, c='red', s=1)
+    else:
+        agents, = ax.plot(x, y, 'go', markersize=1)  # Usa un tamaño mayor
 
-    return figure, ax, agents
+
+    return figure, ax, agents, scatter
 
 #def update_plot(modelo, agents, ax):
     # Actualizar los agentes en el gráfico
@@ -46,7 +58,8 @@ def update(frames,
             alpha_incremento = 0.005,
             peso_decremento = 0.8,
             start = 0,
-            cmap = mcolors.LinearSegmentedColormap.from_list("white_red", ["white", "red"])
+            cmap = mcolors.LinearSegmentedColormap.from_list("white_red", ["white", "red"]),
+            scatter = False
 ):
 
     modelo.step()
@@ -57,12 +70,15 @@ def update(frames,
     print(f"step_counter: {step_counter}")
     #print(f"Tiempo actual: {tiempo_actual}")
 
-    new_x, new_y = [], []
+    new_x, new_y, colors  = [], [], []
     for agente in modelo.schedule.agents:
         if agente.en_movimiento and agente.posicion_actual is not None:
             nodo_actual = nodes_gdf.loc[agente.posicion_actual]
             new_x.append(nodo_actual['x'])
             new_y.append(nodo_actual['y'])
+            #print(f"Agente {agente.unique_id}: color={agente.color}") 
+            colors.append(agente.color)
+
 
             if len(agente.ruta) > 1:
                 nodo_siguiente = agente.ruta[0]
@@ -99,8 +115,23 @@ def update(frames,
         #conteo_aristas[k] -= 0.8
         conteo_aristas[k] = max(0, conteo_aristas[k])
 
-    agents.set_xdata(new_x)
-    agents.set_ydata(new_y)
+    if scatter:
+        agents.set_offsets(np.c_[new_x, new_y])
+
+        converted_colors = []
+        #print(colors)
+        for c in colors:
+            try:
+                converted_colors.append(mcolors.to_rgba(c))
+            except ValueError as e:
+                print(f"Color no válido: {c}")
+                converted_colors.append(mcolors.to_rgba('gray'))
+        agents.set_facecolor(converted_colors)
+    else:
+        agents.set_xdata(new_x)
+        agents.set_ydata(new_y)
+
+
 
     # Agregar o actualizar la barra de colores
     if not hasattr(ax, 'colorbar'):

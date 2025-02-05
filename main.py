@@ -22,8 +22,8 @@ matriz_od = load_data("data/datAll_Hora_kernelDist_AllMes.csv")
 
 
 # Filtrar y generar viajes
-# zorigen = [101003, 104001, 115104, 115106, 115204,115306,101001,106103]
-zorigen = None
+zorigen = [101003, 104001, 115104, 115106, 115204,115306,101001,106103]
+# zorigen = None
 zdestino = zorigen
 matriz_filtrada = filter_data(matriz_od, nodes_with_zones,zonas_origen = zorigen, zonas_destino = zdestino)
 # matriz_filtrada = filter_data(matriz_od, nodes_with_zones,zonas_origen = None, zonas_destino = None)
@@ -34,14 +34,14 @@ modelo = ModeloMovilidad(G, viajes, start=start)
 
 # Configurar la visualización
 
-figure, ax, agents = setup_plot(G = G, nodes_gdf = nodes_gdf)
-ctx.add_basemap(ax, crs=nodes_gdf.crs.to_string(), source=ctx.providers.CartoDB.Positron)
+figure, ax, agents, scatter = setup_plot(G = G, nodes_gdf = nodes_gdf, scatter = True)
+#ctx.add_basemap(ax, crs=nodes_gdf.crs.to_string(), source=ctx.providers.CartoDB.Positron)
 
 
 
 # Contador de pasos
 step_counter = 0
-max_steps = 60  # Número máximo de pasos
+max_steps = 180  # Número máximo de pasos
 
 # Inicializar un diccionario para contar aristas recorridas
 conteo_aristas = defaultdict(int)
@@ -63,7 +63,8 @@ update_partial = partial(update, modelo=modelo,
                         figure=figure,
                         alpha_incremento = 0.1,
                         peso_decremento = 0.8,
-                        start = start)
+                        start = start,
+                        scatter = scatter)
 
 # Crear la animación usando FuncAnimation
 ani = FuncAnimation(figure, update_partial, frames=range(max_steps), blit=True)
