@@ -77,7 +77,8 @@ class AgenteMovil(Agent):
 
         # Calcular distancia total del viaje
         self.distancia_total = sum(
-            model.grafo[self.ruta[i]][self.ruta[i+1]][0]['length']
+            #model.grafo[self.ruta[i]][self.ruta[i+1]][0]['length']
+            min(model.grafo[self.ruta[i]][self.ruta[i+1]].values(), key=lambda x: x['length'])['length']
             for i in range(len(self.ruta) - 1)
         ) if len(self.ruta) > 1 else 0
 
