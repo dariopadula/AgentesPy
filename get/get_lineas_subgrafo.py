@@ -7,6 +7,7 @@ import sklearn
 from shapely.geometry import LineString
 from scipy.spatial import cKDTree
 from collections import deque
+import geopy.distance
 
 ### Arma un arbol para agilizar la búsqueda de puntos cercanos
 
@@ -128,6 +129,9 @@ def map_bus_routes_shortest_path(G, rutas_buses_shape, elimina_ciclos = False):
 
 
     return subgrafos_buses
+
+
+
 
 
 
