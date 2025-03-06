@@ -29,9 +29,9 @@ def setup_plot(G, nodes_gdf, scatter = False):
 
     x, y = [], []
     if scatter:
-        agents = ax.scatter(x, y, c='red', s=1)
+        agents = ax.scatter(x, y, c='red', s=3)
     else:
-        agents, = ax.plot(x, y, 'go', markersize=1)  # Usa un tamaño mayor
+        agents, = ax.plot(x, y, 'go', markersize=3)  # Usa un tamaño mayor
 
 
     return figure, ax, agents, scatter
